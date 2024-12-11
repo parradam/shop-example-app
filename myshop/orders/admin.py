@@ -4,6 +4,7 @@ from .models import Order, OrderItem
 import csv
 import datetime
 from django.http import HttpResponse
+from django.urls import reverse
 
 def export_to_csv(modeladmin, request, queryset):
     opts = modeladmin.model._meta
@@ -40,6 +41,10 @@ def order_payment(obj):
     return ''
 order_payment.short_description = 'Stripe payment'
 
+def order_detail(obj):
+    url = reverse('orders:admin_order_detail', args=[obj.id])
+    return mark_safe(f'<a href="{url}">View</a>')
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     raw_id_fields = ['product']
@@ -57,7 +62,8 @@ class OrderAdmin(admin.ModelAdmin):
         'paid',
         order_payment,
         'created',
-        'updated'
+        'updated',
+        order_detail,
     ]
     list_filter = ['paid', 'created', 'updated']
     inlines = [OrderItemInline]
